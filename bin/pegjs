@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 
-"use strict";
-
 let fs = require("fs");
 let path = require("path");
 let peg = require("../lib/peg");
@@ -61,7 +59,9 @@ function addExtraOptions(options, json) {
   try {
     extraOptions = JSON.parse(json);
   } catch (e) {
-    if (!(e instanceof SyntaxError)) { throw e; }
+    if (!(e instanceof SyntaxError)) {
+      throw e;
+    }
 
     abort("Error parsing JSON: " + e.message);
   }
@@ -96,8 +96,12 @@ function nextArg() {
 
 function readStream(inputStream, callback) {
   let input = "";
-  inputStream.on("data", data => { input += data; });
-  inputStream.on("end", () => { callback(input); });
+  inputStream.on("data", data => {
+    input += data;
+  });
+  inputStream.on("end", () => {
+    callback(input);
+  });
 }
 
 // Main
@@ -128,6 +132,10 @@ while (args.length > 0 && isOption(args[0])) {
       options.allowedStartRules = args[0]
         .split(",")
         .map(trim);
+      break;
+
+    case "--log":
+      options.log = true;
       break;
 
     case "--cache":
@@ -225,7 +233,9 @@ while (args.length > 0 && isOption(args[0])) {
       try {
         mod = require(id);
       } catch (e) {
-        if (e.code !== "MODULE_NOT_FOUND") { throw e; }
+        if (e.code !== "MODULE_NOT_FOUND") {
+          throw e;
+        }
 
         abort("Can't load module \"" + id + "\".");
       }
@@ -310,6 +320,7 @@ readStream(inputStream, input => {
   let source;
 
   try {
+    console.log('generate', options, peg)
     source = peg.generate(input, options);
   } catch (e) {
     if (e.location !== undefined) {

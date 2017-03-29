@@ -610,7 +610,7 @@ $ ll -a lib/
 Now try generating an *indentation parser*
 
 ```bash
-$ bin/./pegjs -o indentation/parsers/indent-parser.js indentation/grammars/simple-indent.pegjs`
+$ bin/pegjs -o indentation/parsers/indent-parser.js indentation/grammars/simple-indent.pegjs`
 ```
 
 This should (hopefully) generate a parser in `indentation/parsers/indent-parser.js`
@@ -620,7 +620,100 @@ I sadly get this *error*, but getting close ;)
 Cannot read property 'apply' of undefined
 ```
 
-An alternative can ebe found [here](https://github.com/tebbi/pegjs/commit/0015ea18a5276b5d097df21ff6ccdaa8c704b5c4) using a global `env` variable.
+Do I need to disable the cache via `--cache` option explicitly?
+Looking at `bin/pegjs` it is clear that `cache` is disabled by default
+
+```js
+let options = {
+  cache: false,
+  dependencies: {},
+  exportVar: null,
+  format: "commonjs",
+  optimize: "speed",
+  output: "source",
+  plugins: [],
+  trace: false
+};
+
+// ...
+    case "--cache":
+      options.cache = true;
+```
+
+After debugging as deep as I could, I find that the last statement execute, is:
+
+```b
+rule found for EOL { type: 'rule',
+  name: 'EOL',ash
+  expression:
+   { type: 'literal',
+     value: '\n',
+     ignoreCase: false,
+     location: { start: [Object], end: [Object] } },
+  location:
+   { start: { offset: 351, line: 31, column: 1 },
+     end: { offset: 364, line: 33, column: 1 } } }
+Cannot read property 'apply' of undefined
+```
+
+in `lib/compiler/asts.js`
+
+```js
+let asts = {
+  findRule(ast, name) {
+    for (let i = 0; i < ast.rules.length; i++) {
+      let rule = ast.rules[i]
+      // console.log('rule', rule)
+      if (rule.name === name) {
+        console.log('rule found for', name, rule)
+        return rule;
+      }
+    }
+    console.log('no rule found', name)
+    return undefined;
+  },
+```
+
+The problem must be here:
+
+```js
+let visitor = {
+  build(functions) {
+    function visit(node) {
+      return functions[node.type].apply(null, arguments);
+    }
+```
+
+YES!
+
+```bash
+No function increment_match in { rule_ref: [Function: rule_ref],
+  grammar: [Function: grammar],
+  initializer: [Function: visitNop],
+  rule: [Function: visitExpression],
+  named: [Function: visitExpression],
+  choice: [Function],
+  action: [Function: visitExpression],
+  sequence: [Function],
+  labeled: [Function: visitExpression],
+  text: [Function: visitExpression],
+  simple_and: [Function: visitExpression],
+  simple_not: [Function: visitExpression],
+  optional: [Function: visitExpression],
+  zero_or_more: [Function: visitExpression],
+  one_or_more: [Function: visitExpression],
+  group: [Function: visitExpression],
+  semantic_and: [Function: visitNop],
+  semantic_not: [Function: visitNop],
+  literal: [Function: visitNop],
+  class: [Function: visitNop],
+  any: [Function: visitNop] }
+```
+What now!?
+
+## Alternative
+
+An alternative can be found [here](https://github.com/tebbi/pegjs/commit/0015ea18a5276b5d097df21ff6ccdaa8c704b5c4) using a global `env` variable.
 
 _"extends the parser with an environment object. The user Javascript code can access the object `env`, which is cloned using Object.create on every recursive descent."_
 
