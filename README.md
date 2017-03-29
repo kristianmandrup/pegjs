@@ -626,6 +626,8 @@ _"extends the parser with an environment object. The user Javascript code can ac
 
 [Example](https://github.com/pegjs/pegjs/issues/45#issuecomment-152880054)
 
+The `env` variable has been added in the [tebbi-env](https://github.com/kristianmandrup/pegjs/tree/tebbi-env) branch.
+
 Development
 -----------
 
