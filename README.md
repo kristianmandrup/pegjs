@@ -620,6 +620,12 @@ I sadly get this *error*, but getting close ;)
 Cannot read property 'apply' of undefined
 ```
 
+An alternative can ebe found [here](https://github.com/tebbi/pegjs/commit/0015ea18a5276b5d097df21ff6ccdaa8c704b5c4) using a global `env` variable.
+
+_"extends the parser with an environment object. The user Javascript code can access the object `env`, which is cloned using Object.create on every recursive descent."_
+
+[Example](https://github.com/pegjs/pegjs/issues/45#issuecomment-152880054)
+
 Development
 -----------
 
