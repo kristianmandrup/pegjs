@@ -25,7 +25,9 @@
   const OPS_TO_PREFIXED_TYPES = {
     "$": "text",
     "&": "simple_and",
-    "!": "simple_not"
+    "!": "simple_not",
+    "++": "increment_match",
+    "--": "decrement_match"
   };
 
   const OPS_TO_SUFFIXED_TYPES = {
@@ -152,6 +154,8 @@ PrefixedOperator
   = "$"
   / "&"
   / "!"
+  / "++"
+  / "--"
 
 SuffixedExpression
   = expression:PrimaryExpression __ operator:SuffixedOperator {
@@ -166,7 +170,7 @@ SuffixedExpression
 SuffixedOperator
   = "?"
   / "*"
-  / "+"
+  / "+" !"+"
 
 PrimaryExpression
   = LiteralMatcher
